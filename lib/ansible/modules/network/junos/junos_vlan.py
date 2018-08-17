@@ -30,6 +30,12 @@ options:
     description:
       - ID of the VLAN.
     required: true
+  filter_input:
+    description:
+      - the name of input filter
+  filter_output:
+    description:
+      - the name of output filter
   description:
     description:
       - Text description of VLANs.
@@ -150,6 +156,8 @@ def main():
         vlan_id=dict(type='int'),
         description=dict(),
         interfaces=dict(),
+        filter_input=dict(),
+        filter_output=dict(),
         state=dict(default='present', choices=['present', 'absent']),
         active=dict(default=True, type='bool')
     )
@@ -187,6 +195,8 @@ def main():
     param_to_xpath_map.update([
         ('name', {'xpath': 'name', 'is_key': True}),
         ('vlan_id', 'vlan-id'),
+        ('filter_input', 'filter/input'),
+        ('filter_output', 'filter/output'),
         ('description', 'description')
     ])
 
