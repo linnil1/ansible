@@ -30,6 +30,11 @@ options:
     description:
       - each term block
     required: true
+  family:
+    description:
+      - The protocol family
+    default: inet
+    choices: ['inet', 'inet6', 'ethernet-switching']
   aggregate:
     description: List of Firewall definitions.
   state:
@@ -61,15 +66,15 @@ EXAMPLES = """
           - from:
               source-address: 192.168.200.3/32
               destination-address: 192.168.201.10/32
-            then: 
+            then:
               count: c1
               accept:
           - from:
-              source-address: 
+              source-address:
                 - 192.168.201.3/32
                 - 192.168.201.4/32
               destination-address: 192.168.200.10/32
-            then: 
+            then:
               log:
             name: term_name
           - then:
@@ -92,6 +97,16 @@ EXAMPLES = """
                   discard:
             active: True
             state: present
+
+    - name: set ethernet-switching Firewall
+      junos_firewall:
+        name: fsw
+        family: ethernet-switching
+        terms:
+          - then:
+              accept:
+        active: True
+        state: present
 """
 
 RETURN = """
@@ -155,6 +170,7 @@ def main():
         interfaces=dict(),
         terms=dict(type='list'),
         state=dict(default='present', choices=['present', 'absent']),
+        family=dict(default='inet', choices=['inet', 'inet6', 'ethernet-switching']),
         active=dict(default=True, type='bool')
     )
 
@@ -185,7 +201,7 @@ def main():
     if warnings:
         result['warnings'] = warnings
 
-    top = 'firewall/family/inet/filter'
+    top_format = 'firewall/family/{}/filter'
 
     param_to_xpath_map = collections.OrderedDict()
     param_to_xpath_map.update([
@@ -199,6 +215,8 @@ def main():
         for key in param:
             if param.get(key) is None:
                 param[key] = module.params[key]
+        top = top_format.format(param['family'])
+
         item = param.copy()
         want = map_params_to_obj(module, param_to_xpath_map, param=item)
         ele = map_obj_to_ele(module, want, top, param=item)
