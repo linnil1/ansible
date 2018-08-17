@@ -12,6 +12,96 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
                     'status': ['preview'],
                     'supported_by': 'network'}
 
+DOCUMENTATION = """
+---
+module: junos_firewall
+version_added: "2.7"
+author: "linnil1 (https://github.com/linnil1)"
+short_description: Manage Firewall on Juniper JUNOS network devices
+description:
+  - This module can setting up Firewall logic
+    on Juniper JUNOS network devices.
+options:
+  name:
+    description:
+      - Name of the filter
+    required: true
+  terms:
+    description:
+      - each term block
+    required: true
+  aggregate:
+    description: List of Firewall definitions.
+  state:
+    description:
+      - State of the Firewall configuration.
+    default: present
+    choices: ['present', 'absent']
+  active:
+    description:
+      - Specifies whether or not the configuration is active or deactivated
+    default: True
+    type: bool
+requirements:
+  - ncclient (>=v0.5.2)
+notes:
+  - This module requires the netconf system service be enabled on
+    the remote device being managed.
+  - Tested against Juniper EX4300
+  - Recommended connection is C(netconf). See L(the Junos OS Platform Options,../network/user_guide/platform_junos.html).
+  - This module also works with C(local) connections for legacy playbooks.
+extends_documentation_fragment: junos
+"""
+
+EXAMPLES = """
+    - name: set Firewall
+      junos_firewall:
+        name: f5
+        terms:
+          - from:
+              source-address: 192.168.200.3/32
+              destination-address: 192.168.201.10/32
+            then: 
+              count: c1
+              accept:
+          - from:
+              source-address: 
+                - 192.168.201.3/32
+                - 192.168.201.4/32
+              destination-address: 192.168.200.10/32
+            then: 
+              log:
+            name: term_name
+          - then:
+              discard:
+        active: True
+        state: present
+
+    - name: set Firewall by aggregation
+      junos_firewall:
+        aggregate:
+          - name: f5
+            terms:
+              - then:
+                  discard:
+            active: True
+            state: present
+          - name: f6
+            terms:
+              - then:
+                  discard:
+            active: True
+            state: present
+"""
+
+RETURN = """
+diff.prepared:
+  description: Configuration difference before and after applying change.
+  returned: when configuration is changed and diff option is enabled.
+  type: string
+  sample: >
+"""
+
 import collections
 
 from copy import deepcopy
