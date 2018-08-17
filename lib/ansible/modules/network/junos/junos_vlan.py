@@ -33,6 +33,12 @@ options:
   l3_interface:
     description:
       -  Name of logical layer 3 interface
+  filter_input:
+    description:
+      - the name of input filter
+  filter_output:
+    description:
+      - the name of output filter
   description:
     description:
       - Text description of VLANs.
@@ -161,6 +167,8 @@ def main():
         description=dict(),
         interfaces=dict(),
         l3_interface=dict(),
+        filter_input=dict(),
+        filter_output=dict(),
         state=dict(default='present', choices=['present', 'absent']),
         active=dict(default=True, type='bool')
     )
@@ -199,6 +207,8 @@ def main():
         ('name', {'xpath': 'name', 'is_key': True}),
         ('vlan_id', 'vlan-id'),
         ('l3_interface', 'l3-interface'),
+        ('filter_input', 'filter/input'),
+        ('filter_output', 'filter/output'),
         ('description', 'description')
     ])
 
