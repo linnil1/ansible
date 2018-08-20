@@ -136,6 +136,16 @@ except ImportError:
 
 USE_PERSISTENT_CONNECTION = True
 
+def recur_map(ele, dic):
+    for key, value in dic.items():
+        if not isinstance(value, (list, tuple)):
+            value = [value]
+        for val in value:
+            if isinstance(val, dict):
+                recur_map(SubElement(ele, key), val)
+            else:
+                SubElement(ele, key).text = val
+
 def set_term_ele(ele, term):
     terms_ele = []
     for i, term in enumerate(term):
@@ -148,12 +158,7 @@ def set_term_ele(ele, term):
         terms_parm = ['from', 'then']
         for ft in terms_parm:
             if term.get(ft) :
-                ft_ele = SubElement(term_ele, ft)
-                for key, value in term[ft].items():
-                    if not isinstance(value, (list, tuple)):
-                        value = [value]
-                    for val in value:
-                        SubElement(ft_ele, key).text = val
+                recur_map(SubElement(term_ele, ft), term[ft])
 
         terms_ele.append(term_ele)
 
