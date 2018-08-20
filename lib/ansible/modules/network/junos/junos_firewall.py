@@ -107,6 +107,16 @@ EXAMPLES = """
               accept:
         active: True
         state: present
+
+    - name: set routing instance
+      junos_firewall:
+        name: test1
+        terms:
+          - then:
+              routing-instance:
+                routing-instance-name: vrf1
+        active: True
+        state: present
 """
 
 RETURN = """
