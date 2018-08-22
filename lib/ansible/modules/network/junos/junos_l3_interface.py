@@ -38,16 +38,20 @@ options:
     default: 0
   filter_input:
     description:
-      - the name of input filter
+      - The name of input filter.
+    version_added: "2.7"
   filter_output:
     description:
-      - the name of output filter
+      - The name of output filter.
+    version_added: "2.7"
   filter6_input:
     description:
-      - the name of input filter for ipv6
+      - The name of input filter for ipv6.
+    version_added: "2.7"
   filter6_output:
     description:
-      - the name of output filter for ipv6
+      - The name of output filter for ipv6.
+    version_added: "2.7"
   aggregate:
     description: List of L3 interfaces definitions
   state:
