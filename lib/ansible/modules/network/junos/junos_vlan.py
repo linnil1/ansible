@@ -36,10 +36,12 @@ options:
      version_added: "2.7"
   filter_input:
     description:
-      - the name of input filter
+      - The name of input filter.
+    version_added: "2.7"
   filter_output:
     description:
-      - the name of output filter
+      - The name of output filter.
+    version_added: "2.7"
   description:
     description:
       - Text description of VLANs.
