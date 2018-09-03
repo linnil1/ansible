@@ -1,0 +1,167 @@
+---
+- debug:
+    msg: "START junos_firewall netconf/basic.yaml on connection={{ ansible_connection }}"
+
+- name: setup - remove firewall
+  junos_firewall:
+    name: test-firewall
+    state: absent
+
+- name: Create firewall
+  junos_firewall:
+    name: test-firewall
+    terms:
+      - then:
+          accept:
+    state: present
+  register: result
+
+- name: Get running configuration
+  junos_rpc:
+    rpc: get-configuration
+  register: config
+
+- assert:
+    that:
+      - "result.changed == true"
+      - result.diff.prepared is search("\+ *[edit firewall family inet]")
+      - result.diff.prepared is search("\+ *filter test-firewall")
+      - result.diff.prepared is search("\+ *term term_0")
+      - result.diff.prepared is search("\+ *then accept;")
+      - config.xml is search("<filter>\s*<name>test-firewall</name>")
+
+- name: Create firewall again (idempotent)
+  junos_firewall:
+    name: test-firewall
+    terms:
+      - then:
+          accept:
+    state: present
+  register: result
+
+- assert:
+    that:
+      - "result.changed == false"
+
+- name: Deactivate firewall
+  junos_firewall:
+    name: test-firewall
+    terms:
+      - then:
+          accept:
+    state: present
+    active: False
+  register: result
+
+- name: Get running configuration
+  junos_rpc:
+    rpc: get-configuration
+  register: config
+
+- assert:
+    that:
+      - "result.changed == true"
+      - config.xml is search('<filter inactive="inactive">\s*<name>test-firewall</name>')
+
+- name: Activate firewall
+  junos_firewall:
+    name: test-firewall
+    terms:
+      - then:
+          accept:
+    state: present
+    active: True
+  register: result
+
+- name: Get running configuration
+  junos_rpc:
+    rpc: get-configuration
+  register: config
+
+- assert:
+    that:
+      - "result.changed == true"
+      - config.xml is search("<filter>\s*<name>test-firewall</name>")
+
+- name: Delete firewall
+  junos_firewall:
+    name: test-firewall
+    state: absent
+  register: result
+
+- name: Get running configuration
+  junos_rpc:
+    rpc: get-configuration
+  register: config
+
+- assert:
+    that:
+      - "result.changed == true"
+      - "'<name>test-firewall</name>' not in config.xml"
+
+- name: Setup - Delete firewall configuration for aggregate
+  junos_firewall:
+    aggregate:
+      - name: test_firewall_1
+      - name: test_firewall_2
+    state: absent
+
+- name: Create firewall configuration using aggregate
+  junos_firewall:
+    aggregate:
+      - name: test_firewall_1
+        terms:
+        - then:
+            accept:
+      - name: test_firewall_2
+        terms:
+        - then:
+            accept:
+  register: result
+
+- name: Get running configuration
+  junos_rpc:
+    rpc: get-configuration
+  register: config
+
+- assert:
+    that:
+      - "result.changed == true"
+      - "'<name>test_firewall_1</name>' in config.xml"
+      - "'<name>test_firewall_2</name>' in config.xml"
+
+- name: Delete firewall configuration using aggregate
+  junos_firewall:
+    aggregate:
+      - name: test_firewall_1
+      - name: test_firewall_2
+    state: absent
+  register: result
+
+- assert:
+    that:
+      - 'result.changed == true'
+      - result.diff.prepared is search("\- *filter *test_firewall_1")
+      - result.diff.prepared is search("\- *filter *test_firewall_2")
+
+- name: Delete firewall configuration using aggregate (idempotent)
+  junos_firewall:
+    aggregate:
+      - name: test_firewall_1
+      - name: test_firewall_2
+    state: absent
+  register: result
+
+- name: Get running configuration
+  junos_rpc:
+    rpc: get-configuration
+  register: config
+
+- assert:
+    that:
+      - 'result.changed == false'
+      - "'<name>test_firewall_1</name>' not in config.xml"
+      - "'<name>test_firewall_2</name>' not in config.xml"
+
+- debug:
+    msg: "END junos_firewall netconf/basic.yaml on connection={{ ansible_connection }}"

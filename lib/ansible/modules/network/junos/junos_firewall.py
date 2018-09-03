@@ -25,6 +25,7 @@ options:
   name:
     description:
       - Name of filter.
+    type: dict
     required: true
   terms:
     description:
@@ -39,13 +40,11 @@ options:
       from:
         description:
           - Conditions of this term.
-        type: dict
         aliases:
           - if
       then:
         description:
           - Action of this term.
-        type: dict
   family:
     description:
       - Protocol family of Firewall.
@@ -206,8 +205,8 @@ def main():
         name=dict(),
         terms=dict(type='list', elements='dict', options=dict([
             ('name', dict()),
-            ('from', dict(type=dict, aliases=['if'])),
-            ('then', dict(type=dict)),
+            ('from', dict(type='dict', aliases=['if'])),
+            ('then', dict(type='dict')),
         ])),
         state=dict(default='present', choices=['present', 'absent']),
         family=dict(default='inet',
